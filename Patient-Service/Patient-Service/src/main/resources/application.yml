@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: Patient-Service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hospital_Patient
+    username: postgres
+    password: 414963
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8082
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
