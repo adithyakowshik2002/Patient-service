@@ -15,6 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.List;
 
 @Entity
 @Table(name="PATIENTS")
@@ -27,6 +28,7 @@ public class PatientEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Patient_ID")
     private Long id;
 
 
@@ -76,6 +78,9 @@ public class PatientEntity {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "patient",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Appointment> appointments;
 
     @PrePersist
     @PreUpdate

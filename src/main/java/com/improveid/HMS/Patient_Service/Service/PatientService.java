@@ -9,7 +9,6 @@ import com.improveid.HMS.Patient_Service.Exception.PatientNotFoundException;
 import com.improveid.HMS.Patient_Service.Exception.ResourceNotFoundException;
 import com.improveid.HMS.Patient_Service.Mapper.PatientMapper;
 import com.improveid.HMS.Patient_Service.Repository.PatientRepository;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,7 +68,6 @@ public class PatientService {
         existingPatient.setPhoneNumber(patientRequest.getPhoneNumber());
         existingPatient.setAddress(patientRequest.getAddress());
         existingPatient.setBloodGroup(patientRequest.getBloodGroup());
-
         existingPatient.AgeCalulate();
 
         PatientEntity savedPatient = patientRepository.save(existingPatient);

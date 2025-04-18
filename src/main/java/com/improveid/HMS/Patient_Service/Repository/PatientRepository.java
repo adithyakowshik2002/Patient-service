@@ -16,4 +16,6 @@ public interface PatientRepository extends JpaRepository<PatientEntity,Integer> 
     Optional<PatientEntity> findByAadhar(String aadhar);
 
     List<PatientEntity> findByBloodGroup(BloodGroup bloodGroup);
+
+    Optional<PatientEntity> findByPhoneNumber(String phoneNumber);
 }

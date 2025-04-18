@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -19,8 +20,6 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -37,6 +36,16 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<Object> handleCustomException(CustomException ex) {
+
+        return buildErrorResponse("Custom exceptions",ex.getMessage(), HttpStatus.valueOf(ex.getStatus()));
+    }
+
+    public ResponseEntity<Object> handleRunTimeException(RuntimeException ex){
+        return buildErrorResponse("Internal Server Error",ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<Object> handleDatabaseException(DataAccessException ex){
         return buildErrorResponse("Database Exception",ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
@@ -77,6 +86,7 @@ public class GlobalExceptionHandler {
 
 
     }
+
     private ResponseEntity<Object> buildErrorResponse(String title,String message,HttpStatus status){
         Map<String,Object> errorBody = new HashMap<>();
         errorBody.put("timestamp", LocalDate.now());

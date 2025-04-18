@@ -4,10 +4,9 @@ package com.improveid.HMS.Patient_Service.Controller;
 import com.improveid.HMS.Patient_Service.Dto.response.PatientResponse;
 import com.improveid.HMS.Patient_Service.Dto.request.PatientRequest;
 import com.improveid.HMS.Patient_Service.Enums.BloodGroup;
-import com.improveid.HMS.Patient_Service.Exception.PatientNotFoundException;
 import com.improveid.HMS.Patient_Service.Service.PatientService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,15 +16,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/patients")
+@RequiredArgsConstructor
 public class PatientController {
 
 
-    @Autowired
-    private  PatientService patientService;
+
+    private final PatientService patientService;
 
     @PostMapping
-    public ResponseEntity<PatientResponse> addPatient(@Valid @RequestBody PatientRequest patientRequest){
-
+    public ResponseEntity<PatientResponse> CreatePatient(@Valid @RequestBody PatientRequest patientRequest){
        PatientResponse addPatient = patientService.addPatient(patientRequest);
         return new ResponseEntity<>(addPatient,HttpStatus.CREATED);
     }
@@ -37,15 +36,9 @@ public class PatientController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PatientResponse> getPatientById(@PathVariable Integer id) throws PatientNotFoundException {
+    public ResponseEntity<PatientResponse> getPatientById(@PathVariable Integer id)  {
        PatientResponse response = patientService.getPatientById(id);
         return new ResponseEntity<>(response,HttpStatus.OK);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<PatientResponse> updatePatient(@PathVariable Integer id, @RequestBody PatientRequest patientRequest){
-        PatientResponse updatePatient = patientService.updatePatient(id,patientRequest);
-        return new ResponseEntity<>(updatePatient,HttpStatus.OK);
     }
 
     @GetMapping("/aadhar/{aadhar}")
@@ -66,6 +59,13 @@ public class PatientController {
 
         return new ResponseEntity<>(patients,HttpStatus.OK);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PatientResponse> updatePatient(@PathVariable Integer id, @RequestBody PatientRequest patientRequest){
+        PatientResponse updatePatient = patientService.updatePatient(id,patientRequest);
+        return new ResponseEntity<>(updatePatient,HttpStatus.OK);
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletePatient(@PathVariable Integer id) {

@@ -1,10 +1,12 @@
 package com.improveid.HMS.Patient_Service.Exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
 import java.util.Map;
 
+@Builder
+@Setter
+@Getter
 @Data
 @AllArgsConstructor
 public class ErrorResponse {
