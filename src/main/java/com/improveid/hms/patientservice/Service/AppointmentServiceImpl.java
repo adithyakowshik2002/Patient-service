@@ -4,13 +4,16 @@ import com.improveid.hms.patientservice.Dto.response.AppointmentResponse;
 import com.improveid.hms.patientservice.Entity.Appointment;
 import com.improveid.hms.patientservice.Enums.AppointmentStatus;
 import com.improveid.hms.patientservice.Enums.AppointmentType;
+import com.improveid.hms.patientservice.Enums.RoomType;
 import com.improveid.hms.patientservice.Exception.CustomException;
+import com.improveid.hms.patientservice.Exception.EntityNotFoundException;
 import com.improveid.hms.patientservice.Mapper.AppointmentMapper;
 import com.improveid.hms.patientservice.Repository.AppointmentRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -135,10 +138,21 @@ public class AppointmentServiceImpl implements AppointmentService{
 
     }
 
+    @Override
+    public Long getPatientIdByAppointmentId(Long appointmentId) {
+        return appointmentRepository.findById(appointmentId)
+                .map(appointment -> appointment.getPatient().getId())
+                .orElse(null);
+    }
 
 
+@Override
+    public String getRoomTypeByAppointmentId(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found with id: " + appointmentId));
 
-
+        return appointment.getRoomType().toString(); // assuming you have a field called 'roomType' in AppointmentEntity
+    }
 
 
 

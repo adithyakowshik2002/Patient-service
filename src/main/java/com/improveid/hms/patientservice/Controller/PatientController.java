@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 
@@ -19,14 +21,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PatientController {
 
-
-
     private final PatientService patientService;
 
     @PostMapping
-    public ResponseEntity<PatientResponse> CreatePatient(@Valid @RequestBody PatientRequest patientRequest){
-       PatientResponse addPatient = patientService.addPatient(patientRequest);
-        return new ResponseEntity<>(addPatient,HttpStatus.CREATED);
+    public ResponseEntity<String> CreatePatientAndBookAppointment(@RequestBody PatientRequest patientRequest,@RequestParam Long doctorId,@RequestParam LocalDate slotDate,@RequestParam LocalTime slotStartTime)
+    {
+        patientService.registerPatientAndBookAppointment(patientRequest,doctorId,slotDate,slotStartTime);
+        return new ResponseEntity<>("Patient registered and appointment booked successfully!",HttpStatus.CREATED);
     }
 
     @GetMapping

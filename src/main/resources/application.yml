@@ -1,10 +1,10 @@
 spring:
   application:
-    name: Patient-Service
+    name: PATIENT-SERVICE
   datasource:
     url: jdbc:postgresql://localhost:5432/hospital_Patient
     username: postgres
-    password: 414963
+    password: Akhil429@
   jpa:
     hibernate:
       ddl-auto: update

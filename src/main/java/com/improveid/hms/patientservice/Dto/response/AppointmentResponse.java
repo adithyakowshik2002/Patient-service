@@ -17,7 +17,6 @@ public class AppointmentResponse {
 
     private Long appointmentId;
     private Long patientId;
-    private Long doctorId;
     private LocalDate appointmentDate;
     private LocalTime timeslot;
     private AppointmentType appointmentType; // Will be OP for normal bookings

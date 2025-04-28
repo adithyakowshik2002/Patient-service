@@ -13,4 +13,8 @@ public interface AppointmentService {
     List<AppointmentResponse> getAppointmentsForPatient(Long patientId);
     List<AppointmentResponse> getAppointmentsByStatus(String status);
     AppointmentResponse convertToIP(Long appointmentId,AppointmentRequest request);
+    Long getPatientIdByAppointmentId(Long appointmentId);
+    String getRoomTypeByAppointmentId(Long appointmentId);
+
+
 }

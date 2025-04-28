@@ -3,6 +3,7 @@ package com.improveid.hms.patientservice.Repository;
 
 import com.improveid.hms.patientservice.Entity.Appointment;
 import com.improveid.hms.patientservice.Enums.AppointmentStatus;
+import com.improveid.hms.patientservice.Enums.AppointmentType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,5 +20,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByPatientId(Long patientId);
 
     List<Appointment> findByStatus(AppointmentStatus status);
+
+
 
 }

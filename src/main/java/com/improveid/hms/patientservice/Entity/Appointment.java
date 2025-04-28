@@ -5,7 +5,7 @@ import com.improveid.hms.patientservice.Enums.AppointmentStatus;
 import com.improveid.hms.patientservice.Enums.AppointmentType;
 import jakarta.persistence.*;
 import lombok.*;
-
+import com.improveid.hms.patientservice.Enums.RoomType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -28,6 +28,8 @@ public class Appointment {
     @JsonBackReference
     private PatientEntity patient;
 
+    @Column
+    private Long scheduleId; //scheduleId from doctor service
 
     @Column(name = "appointment_date", nullable = false)
     private LocalDate appointmentDate;
@@ -41,10 +43,14 @@ public class Appointment {
     @Builder.Default
     private AppointmentType appointmentType =AppointmentType.OP;//Default to OP
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+     private RoomType roomType=RoomType.NON_AC;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private AppointmentStatus status =AppointmentStatus.BOOKED;
+    private AppointmentStatus status =AppointmentStatus.CANCELLED;
 
 }

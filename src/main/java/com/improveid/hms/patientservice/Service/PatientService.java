@@ -5,17 +5,23 @@ import com.improveid.hms.patientservice.Dto.response.PatientResponse;
 import com.improveid.hms.patientservice.Dto.request.PatientRequest;
 import com.improveid.hms.patientservice.Entity.Appointment;
 import com.improveid.hms.patientservice.Entity.PatientEntity;
+import com.improveid.hms.patientservice.Enums.AppointmentStatus;
+import com.improveid.hms.patientservice.Enums.AppointmentType;
 import com.improveid.hms.patientservice.Enums.BloodGroup;
 import com.improveid.hms.patientservice.Exception.PatientNotFoundException;
 import com.improveid.hms.patientservice.Exception.ResourceNotFoundException;
 import com.improveid.hms.patientservice.Mapper.PatientMapper;
+import com.improveid.hms.patientservice.Repository.AppointmentRepository;
 import com.improveid.hms.patientservice.Repository.PatientRepository;
+import com.improveid.hms.patientservice.feign.DoctorClient;
+import com.improveid.hms.patientservice.feign.SlotBookedDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Period;
 import java.util.List;
 
@@ -26,6 +32,12 @@ public class PatientService {
 
     @Autowired
     private   PatientRepository patientRepository;
+
+    @Autowired
+    private DoctorClient doctorClient;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
 
     @Autowired
     private PatientMapper patientMapper;
@@ -109,6 +121,43 @@ public class PatientService {
         return patients.stream().map(patientMapper::toResponse).toList();
     }
 
+    @Transactional
+    public void registerPatientAndBookAppointment(PatientRequest request, Long doctorId, LocalDate slotDate, LocalTime slotStartTime) {
+
+        PatientEntity patient = patientMapper.toEntity(request);
+        patient = patientRepository.save(patient);
+
+
+        Long scheduleId = doctorClient.findScheduleId(doctorId, slotDate, slotStartTime);
+
+        if (scheduleId == null) {
+            throw new IllegalArgumentException("No schedule found for the given doctor, date, and time.");
+        }
+
+
+        Appointment appointment = Appointment.builder()
+                .patient(patient)
+                .scheduleId(scheduleId)
+                .appointmentDate(slotDate)
+                .timeslot(slotStartTime)  //start time
+                .appointmentType(AppointmentType.OP)
+                .status(AppointmentStatus.BOOKED)
+                .build();
+
+        appointmentRepository.save(appointment);
+
+        // 4. Book Slot in Doctor Service
+        SlotBookedDTO slotRequest = SlotBookedDTO.builder()
+                .scheduleId(scheduleId)
+                .patientId(patient.getId())
+                .slotDate(String.valueOf(slotDate))
+                .slotStartTime(String.valueOf(slotStartTime))
+                .slotEndTime(String.valueOf(slotStartTime.plusMinutes(15)))
+                .status("BOOKED")
+                .build();
+
+        doctorClient.bookSlot(slotRequest);
+    }
 
 
 }

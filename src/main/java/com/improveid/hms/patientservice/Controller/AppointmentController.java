@@ -4,6 +4,7 @@ import com.improveid.hms.patientservice.Dto.request.AppointmentRequest;
 import com.improveid.hms.patientservice.Dto.request.PatientRequest;
 import com.improveid.hms.patientservice.Dto.response.AppointmentResponse;
 import com.improveid.hms.patientservice.Dto.response.PatientResponse;
+import com.improveid.hms.patientservice.Entity.Appointment;
 import com.improveid.hms.patientservice.Service.AppointmentServiceImpl;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -67,7 +69,18 @@ public class AppointmentController {
         return ResponseEntity.ok("Appointment Converted to IP successfully");
     }
 
-
+    @GetMapping("/appointment/{appointmentId}")
+    public ResponseEntity<Long> getPatientIdByAppointmentId(@PathVariable Long appointmentId) {
+        Long patientId = appointmentService.getPatientIdByAppointmentId(appointmentId);
+        if (patientId == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(patientId);
+    }
+    @GetMapping("/room-type/{appointmentId}")
+    public String getRoomTypeByAppointmentId(@PathVariable Long appointmentId) {
+        return appointmentService.getRoomTypeByAppointmentId(appointmentId);
+    }
 
 
 }

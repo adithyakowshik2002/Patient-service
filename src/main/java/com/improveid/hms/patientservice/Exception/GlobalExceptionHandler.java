@@ -20,6 +20,12 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex)
+    {
+return buildErrorResponse("Entity not found", ex.getMessage(),HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationError(MethodArgumentNotValidException ex){
 
