@@ -38,6 +38,9 @@ public class Appointment {
     private LocalTime timeslot;
 
 
+    @Column(nullable = false) // ADD THIS FIELD
+    private Long doctorId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

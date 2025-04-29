@@ -13,11 +13,11 @@ import java.time.LocalTime;
 @FeignClient(name = "DOCTOR-SERVICE")
 public interface DoctorClient {
 
-    @GetMapping("/api/doctor/find-schedule-id")
+    @GetMapping("/api/doctors/find-schedule-id")
     Long findScheduleId(@RequestParam Long doctorId,
                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime time);
+                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime slotTime);
 
-    @PostMapping("/api/doctor/book-slot")
+    @PostMapping("/api/doctors/book-slot")
     void bookSlot(@RequestBody SlotBookedDTO request);
 }

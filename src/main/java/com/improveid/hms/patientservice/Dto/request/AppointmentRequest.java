@@ -23,6 +23,9 @@ public class AppointmentRequest {
     private Long appointmentId;
 
 
+    // ADD THIS FIELD
+    private Long doctorId;
+
     private Long patientId;
 
     private LocalDate appointmentDate;

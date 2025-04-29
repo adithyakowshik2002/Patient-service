@@ -7,6 +7,7 @@ import com.improveid.hms.patientservice.Enums.BloodGroup;
 import com.improveid.hms.patientservice.Service.PatientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class PatientController {
     private final PatientService patientService;
 
     @PostMapping
-    public ResponseEntity<String> CreatePatientAndBookAppointment(@RequestBody PatientRequest patientRequest,@RequestParam Long doctorId,@RequestParam LocalDate slotDate,@RequestParam LocalTime slotStartTime)
+    public ResponseEntity<String> CreatePatientAndBookAppointment(@RequestBody PatientRequest patientRequest, @RequestParam Long doctorId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate slotDate, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalTime slotStartTime)
     {
         patientService.registerPatientAndBookAppointment(patientRequest,doctorId,slotDate,slotStartTime);
         return new ResponseEntity<>("Patient registered and appointment booked successfully!",HttpStatus.CREATED);

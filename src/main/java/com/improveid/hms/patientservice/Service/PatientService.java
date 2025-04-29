@@ -121,19 +121,16 @@ public class PatientService {
         return patients.stream().map(patientMapper::toResponse).toList();
     }
 
-    @Transactional
+
     public void registerPatientAndBookAppointment(PatientRequest request, Long doctorId, LocalDate slotDate, LocalTime slotStartTime) {
-
-        PatientEntity patient = patientMapper.toEntity(request);
-        patient = patientRepository.save(patient);
-
 
         Long scheduleId = doctorClient.findScheduleId(doctorId, slotDate, slotStartTime);
 
         if (scheduleId == null) {
             throw new IllegalArgumentException("No schedule found for the given doctor, date, and time.");
         }
-
+        PatientEntity patient = patientMapper.toEntity(request);
+        patient = patientRepository.save(patient);
 
         Appointment appointment = Appointment.builder()
                 .patient(patient)
@@ -142,6 +139,7 @@ public class PatientService {
                 .timeslot(slotStartTime)  //start time
                 .appointmentType(AppointmentType.OP)
                 .status(AppointmentStatus.BOOKED)
+                .doctorId(doctorId)
                 .build();
 
         appointmentRepository.save(appointment);

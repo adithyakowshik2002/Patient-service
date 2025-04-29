@@ -12,7 +12,8 @@ public class SlotBookedDTO {
   private Long patientId;
   private Long scheduleId;
     private String slotEndTime;
-    private String status;
+    @Builder.Default
+    private String status=new String("NOTBOOKED");
 
 
 }
