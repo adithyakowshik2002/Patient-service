@@ -20,18 +20,20 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/patients")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class PatientController {
 
     private final PatientService patientService;
 
     @PostMapping
+    @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<String> CreatePatientAndBookAppointment(@RequestBody PatientRequest patientRequest, @RequestParam Long doctorId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate slotDate, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalTime slotStartTime)
     {
         patientService.registerPatientAndBookAppointment(patientRequest,doctorId,slotDate,slotStartTime);
         return new ResponseEntity<>("Patient registered and appointment booked successfully!",HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping("getallpatients")
     public ResponseEntity<List<PatientResponse>> getALlPatients(){
         List<PatientResponse> Patients = patientService.getAllPatients();
         return new ResponseEntity<>(Patients,HttpStatus.OK);

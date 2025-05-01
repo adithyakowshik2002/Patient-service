@@ -74,7 +74,8 @@ public class PatientEntity {
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt=LocalDateTime.now();
 
     @LastModifiedDate
     @Column(name = "updated_at")

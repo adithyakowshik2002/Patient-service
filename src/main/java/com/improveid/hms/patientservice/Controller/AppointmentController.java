@@ -3,6 +3,7 @@ package com.improveid.hms.patientservice.Controller;
 import com.improveid.hms.patientservice.Dto.request.AppointmentRequest;
 import com.improveid.hms.patientservice.Dto.request.PatientRequest;
 import com.improveid.hms.patientservice.Dto.response.AppointmentResponse;
+import com.improveid.hms.patientservice.Dto.response.AppointmentsDto;
 import com.improveid.hms.patientservice.Dto.response.PatientResponse;
 import com.improveid.hms.patientservice.Entity.Appointment;
 import com.improveid.hms.patientservice.Service.AppointmentServiceImpl;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/appointments")
 @Slf4j
+@CrossOrigin(origins = "http://localhost:5173")
 public class AppointmentController {
 
     @Autowired
@@ -29,6 +31,7 @@ public class AppointmentController {
 
 
     @PostMapping("/book")
+    @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<AppointmentResponse> book(@Valid @RequestBody AppointmentRequest request) {
         log.info("Booking appointment for patientId={}", request.getPatientId());
         AppointmentResponse appointment = appointmentService.bookAppointment(request);
@@ -42,7 +45,7 @@ public class AppointmentController {
         return new ResponseEntity<>(appointment,HttpStatus.OK);
     }
 
-    @GetMapping("/patient/{patientId}")
+    @GetMapping("/appointments/{patientId}")
     public ResponseEntity<List<AppointmentResponse>> getAppointmentsForPatient(@PathVariable Long patientId) {
         log.info("Fetching appointments for patient {}", patientId);
         List<AppointmentResponse> appointments = appointmentService.getAppointmentsForPatient(patientId);
@@ -82,5 +85,10 @@ public class AppointmentController {
         return appointmentService.getRoomTypeByAppointmentId(appointmentId);
     }
 
+    @GetMapping("fetch-appointments/{doctorId}")
+    public ResponseEntity<List<AppointmentsDto>> getAppointmentsByDoctorId(@PathVariable Long doctorId) {
+        List<AppointmentsDto> responses = appointmentService.getAppointmentsByDoctorId(doctorId);
+        return ResponseEntity.ok(responses);
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.improveid.hms.patientservice.Service;
 import com.improveid.hms.patientservice.Dto.request.AppointmentRequest;
 import com.improveid.hms.patientservice.Dto.response.AppointmentResponse;
+import com.improveid.hms.patientservice.Dto.response.AppointmentsDto;
 import com.improveid.hms.patientservice.Entity.Appointment;
 import com.improveid.hms.patientservice.Enums.AppointmentStatus;
 import com.improveid.hms.patientservice.Enums.AppointmentType;
@@ -154,6 +155,20 @@ public class AppointmentServiceImpl implements AppointmentService{
         return appointment.getRoomType().toString(); // assuming you have a field called 'roomType' in AppointmentEntity
     }
 
+    @Override
+    public List<AppointmentsDto> getAppointmentsByDoctorId(Long doctorId) {
+        List<Appointment> appointments = appointmentRepository.findByDoctorId(doctorId);
 
+        return appointments.stream().map(this::mapToResponse).collect(Collectors.toList());
+    }
 
+    private AppointmentsDto mapToResponse(Appointment appointment) {
+        return AppointmentsDto.builder()
+                .appointmentId(appointment.getAppointmentId())
+                .patientName(appointment.getPatient().getFirstName()+appointment.getPatient().getLastName())
+                .appointmentDate(appointment.getAppointmentDate())
+                .timeslot(appointment.getTimeslot())
+                .appointmentType(appointment.getAppointmentType())
+                .build();
+    }
 }

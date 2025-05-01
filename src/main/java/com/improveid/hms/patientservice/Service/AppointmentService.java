@@ -2,6 +2,7 @@ package com.improveid.hms.patientservice.Service;
 
 import com.improveid.hms.patientservice.Dto.request.AppointmentRequest;
 import com.improveid.hms.patientservice.Dto.response.AppointmentResponse;
+import com.improveid.hms.patientservice.Dto.response.AppointmentsDto;
 
 import java.util.List;
 
@@ -17,4 +18,5 @@ public interface AppointmentService {
     String getRoomTypeByAppointmentId(Long appointmentId);
 
 
+    List<AppointmentsDto> getAppointmentsByDoctorId(Long doctorId);
 }
