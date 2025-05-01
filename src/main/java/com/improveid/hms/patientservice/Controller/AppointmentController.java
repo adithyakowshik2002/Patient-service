@@ -29,7 +29,6 @@ public class AppointmentController {
     private AppointmentServiceImpl appointmentService;
 
 
-
     @PostMapping("/book")
     @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<AppointmentResponse> book(@Valid @RequestBody AppointmentRequest request) {
