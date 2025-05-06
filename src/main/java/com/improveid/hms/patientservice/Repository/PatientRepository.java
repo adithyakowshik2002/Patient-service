@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PatientRepository extends JpaRepository<PatientEntity,Integer> {
+public interface PatientRepository extends JpaRepository<PatientEntity,Long> {
 
     Optional<PatientEntity> findByEmail(String email);
 
@@ -17,5 +17,6 @@ public interface PatientRepository extends JpaRepository<PatientEntity,Integer> 
 
     List<PatientEntity> findByBloodGroup(BloodGroup bloodGroup);
 
+    Optional<PatientEntity> findById(Long patientId);
     //Optional<PatientEntity> findByPhoneNumber(String phoneNumber);
 }

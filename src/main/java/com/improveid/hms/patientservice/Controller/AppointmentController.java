@@ -29,14 +29,6 @@ public class AppointmentController {
     private AppointmentServiceImpl appointmentService;
 
 
-    @PostMapping("/book")
-    @CrossOrigin(origins = "http://localhost:5173")
-    public ResponseEntity<AppointmentResponse> book(@Valid @RequestBody AppointmentRequest request) {
-        log.info("Booking appointment for patientId={}", request.getPatientId());
-        AppointmentResponse appointment = appointmentService.bookAppointment(request);
-        return new ResponseEntity<>(appointment, HttpStatus.CREATED);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<AppointmentResponse> getAppointmentById(@PathVariable Long id) {
 

@@ -1,11 +1,11 @@
 package com.improveid.hms.patientservice.feign;
 
+import com.improveid.hms.patientservice.Dto.otherService.DoctorDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -20,4 +20,7 @@ public interface DoctorClient {
 
     @PostMapping("/api/doctors/book-slot")
     void bookSlot(@RequestBody SlotBookedDTO request);
+
+    @GetMapping("api/doctors/getbyid/{id}")
+    DoctorDto getDoctorById(@PathVariable Long id);
 }

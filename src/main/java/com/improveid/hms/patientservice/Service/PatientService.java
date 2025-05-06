@@ -1,6 +1,8 @@
 package com.improveid.hms.patientservice.Service;
 
 
+import com.improveid.hms.patientservice.Dto.otherService.DoctorDto;
+import com.improveid.hms.patientservice.Dto.otherService.MailDtoClass;
 import com.improveid.hms.patientservice.Dto.response.PatientResponse;
 import com.improveid.hms.patientservice.Dto.request.PatientRequest;
 import com.improveid.hms.patientservice.Entity.Appointment;
@@ -14,15 +16,14 @@ import com.improveid.hms.patientservice.Mapper.PatientMapper;
 import com.improveid.hms.patientservice.Repository.AppointmentRepository;
 import com.improveid.hms.patientservice.Repository.PatientRepository;
 import com.improveid.hms.patientservice.feign.DoctorClient;
+import com.improveid.hms.patientservice.feign.MailServiceClient;
 import com.improveid.hms.patientservice.feign.SlotBookedDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.Period;
 import java.util.List;
 
 
@@ -34,35 +35,115 @@ public class PatientService {
     private   PatientRepository patientRepository;
 
     @Autowired
-    private DoctorClient doctorClient;
+    private AppointmentRepository appointmentRepository;
 
     @Autowired
-    private AppointmentRepository appointmentRepository;
+    private DoctorClient doctorClient;
 
     @Autowired
     private PatientMapper patientMapper;
 
-    @Transactional
-    public PatientResponse addPatient(PatientRequest patientRequest){
-    log.info("Adding Product");
-    PatientEntity patient = patientMapper.toEntity(patientRequest);
-    if(patient.getAge() == null && patient.getDateOfBirth()!=null)
-    {
-        patient.setAge(Period.between(patient.getDateOfBirth(), LocalDate.now()).getYears());
-    }
+    @Autowired
+    private MailServiceClient mailServiceClient;
 
-    if(patient.getAppointments() !=null)
-    {
-        for (Appointment appointment :patient.getAppointments()){
-            appointment.setPatient(patient);
+    public void registerPatientAndBookAppointment(PatientRequest request, Long doctorId, LocalDate slotDate, LocalTime slotStartTime) {
+
+        Long scheduleId = doctorClient.findScheduleId(doctorId, slotDate, slotStartTime);
+
+        if (scheduleId == null) {
+            throw new IllegalArgumentException("No schedule found for the given doctor, date, and time.");
         }
+
+        PatientEntity patient = patientMapper.toEntity(request);
+        patient = patientRepository.save(patient);
+
+        Appointment appointment = Appointment.builder()
+                .patient(patient)
+                .scheduleId(scheduleId)
+                .appointmentDate(slotDate)
+                .timeslot(slotStartTime)  //start time
+                .appointmentType(AppointmentType.OP)
+                .status(AppointmentStatus.BOOKED)
+                .doctorId(doctorId)
+                .build();
+
+        appointmentRepository.save(appointment);
+
+
+        // 4. Book Slot in Doctor Service
+        SlotBookedDTO slotRequest = SlotBookedDTO.builder()
+                .scheduleId(scheduleId)
+                .patientId(patient.getId())
+                .slotDate(String.valueOf(slotDate))
+                .slotStartTime(String.valueOf(slotStartTime))
+                .slotEndTime(String.valueOf(slotStartTime.plusMinutes(15)))
+                .status("BOOKED")
+                .build();
+
+        doctorClient.bookSlot(slotRequest);
+
+        DoctorDto doctor = doctorClient.getDoctorById(doctorId);
+
+
+
+        MailDtoClass mail = MailDtoClass.builder()
+                .fullName(patient.getFirstName()+patient.getLastName())
+                .doctorName(doctor.getName())
+                .bookedDate(appointment.getAppointmentDate())
+                .slotTime(appointment.getTimeslot())
+                .mailId(patient.getEmail())
+                .build();
+
+        mailServiceClient.sendEmail(mail);
+
+
     }
 
-    PatientEntity savePatient = patientRepository.save(patient);
-    log.info("Patient created");
+    public void bookForExistingPatient(Long patientId,Long doctorId,LocalDate slotDate,LocalTime slotStartingTime) {
 
-        return patientMapper.toResponse(savePatient);
+        Long scheduleId = doctorClient.findScheduleId(doctorId,slotDate,slotStartingTime);
+        if (scheduleId == null) {
+            throw new IllegalArgumentException("No schedule found for the given doctor, date, and time.");
+        }
+
+        PatientEntity patient = patientRepository.findById(patientId).orElseThrow(()->new PatientNotFoundException("Patient not found."));
+        Appointment appointment = new Appointment();
+        appointment.setPatient(patient);
+        appointment.setScheduleId(scheduleId);
+        appointment.setDoctorId(doctorId);
+        appointment.setAppointmentDate(slotDate);
+        appointment.setTimeslot(slotStartingTime);
+        appointment.setAppointmentType(AppointmentType.OP);
+        appointment.setStatus(AppointmentStatus.BOOKED);
+
+        appointmentRepository.save(appointment);
+
+        // 4. Book Slot in Doctor Service
+        SlotBookedDTO slotRequest = SlotBookedDTO.builder()
+                .scheduleId(scheduleId)
+                .patientId(patient.getId())
+                .slotDate(String.valueOf(slotDate))
+                .slotStartTime(String.valueOf(slotStartingTime))
+                .slotEndTime(String.valueOf(slotStartingTime.plusMinutes(15)))
+                .status("BOOKED")
+                .build();
+
+        doctorClient.bookSlot(slotRequest);
+
+        DoctorDto doctor = doctorClient.getDoctorById(doctorId);
+
+
+        MailDtoClass mail = MailDtoClass.builder()
+                .fullName(patient.getFirstName()+patient.getLastName())
+                .doctorName(doctor.getName())
+                .bookedDate(appointment.getAppointmentDate())
+                .slotTime(appointment.getTimeslot())
+                .mailId(patient.getEmail())
+                .build();
+        mailServiceClient.sendEmail(mail);
+
     }
+
 
 
     public List<PatientResponse> getAllPatients(){
@@ -70,14 +151,14 @@ public class PatientService {
         return patientRepository.findAll().stream().map(patientMapper::toResponse).toList();
     }
 
-    public PatientResponse getPatientById(Integer id) throws PatientNotFoundException {
+    public PatientResponse getPatientById(Long id) throws PatientNotFoundException {
         log.info("fetching the patient of id "+id);
 
         return patientRepository.findById(id).map(patientMapper::toResponse).orElseThrow(()-> new PatientNotFoundException("Patient with ID " + id + " not found"));
     }
 
 
-    public PatientResponse updatePatient(Integer id, PatientRequest patientRequest){
+    public PatientResponse updatePatient(Long id, PatientRequest patientRequest){
 
         PatientEntity existingPatient = patientRepository.findById(id).orElseThrow(()->new RuntimeException("Patient not found with ID: "+id));
 
@@ -98,7 +179,7 @@ public class PatientService {
 
     }
 
-    public void deletePatient(Integer id){
+    public void deletePatient(Long id){
         PatientEntity deletingpatinet = patientRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Patient not found with ID: " + id));
         patientRepository.delete(deletingpatinet);
     }
@@ -121,41 +202,6 @@ public class PatientService {
         return patients.stream().map(patientMapper::toResponse).toList();
     }
 
-
-    public void registerPatientAndBookAppointment(PatientRequest request, Long doctorId, LocalDate slotDate, LocalTime slotStartTime) {
-
-        Long scheduleId = doctorClient.findScheduleId(doctorId, slotDate, slotStartTime);
-
-        if (scheduleId == null) {
-            throw new IllegalArgumentException("No schedule found for the given doctor, date, and time.");
-        }
-        PatientEntity patient = patientMapper.toEntity(request);
-        patient = patientRepository.save(patient);
-
-        Appointment appointment = Appointment.builder()
-                .patient(patient)
-                .scheduleId(scheduleId)
-                .appointmentDate(slotDate)
-                .timeslot(slotStartTime)  //start time
-                .appointmentType(AppointmentType.OP)
-                .status(AppointmentStatus.BOOKED)
-                .doctorId(doctorId)
-                .build();
-
-        appointmentRepository.save(appointment);
-
-        // 4. Book Slot in Doctor Service
-        SlotBookedDTO slotRequest = SlotBookedDTO.builder()
-                .scheduleId(scheduleId)
-                .patientId(patient.getId())
-                .slotDate(String.valueOf(slotDate))
-                .slotStartTime(String.valueOf(slotStartTime))
-                .slotEndTime(String.valueOf(slotStartTime.plusMinutes(15)))
-                .status("BOOKED")
-                .build();
-
-        doctorClient.bookSlot(slotRequest);
-    }
 
 
 }

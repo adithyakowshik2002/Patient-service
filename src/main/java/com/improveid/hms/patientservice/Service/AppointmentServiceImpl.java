@@ -33,29 +33,6 @@ public class AppointmentServiceImpl implements AppointmentService{
     @Autowired
     private AppointmentMapper appointmentMapper;
 
-    @Override
-    public AppointmentResponse bookAppointment(AppointmentRequest request){
-        log.info("Booking appointment for  patientId: {}, date: {}, time: {}", request.getPatientId(),
-                request.getAppointmentDate(), request.getTimeslot());
-
-
-        if ( request.getPatientId() == null || request.getAppointmentDate() == null || request.getTimeslot() == null) {
-            throw new CustomException("All fields are required to book an appointment", HttpStatus.BAD_REQUEST);
-        }
-
-        Appointment appointment = appointmentMapper.toEntity(request);
-        log.info("Appointment booked with ID: {}", appointment.getAppointmentId());
-        if(appointment.getStatus()==null)
-       {
-           appointment.setStatus(AppointmentStatus.BOOKED);
-       }
-
-        appointmentRepository.save(appointment);
-
-        return appointmentMapper.toResponse(appointment);
-    }
-
-    // fetch the doctor on a specific date
 
     //  it will fetch the patient
     @Override

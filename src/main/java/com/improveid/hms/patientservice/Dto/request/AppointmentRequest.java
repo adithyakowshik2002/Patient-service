@@ -18,8 +18,6 @@ import java.time.LocalTime;
 @Builder
 public class AppointmentRequest {
 
-
-
     private Long appointmentId;
 
 

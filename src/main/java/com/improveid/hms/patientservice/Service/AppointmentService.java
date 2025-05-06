@@ -7,7 +7,6 @@ import com.improveid.hms.patientservice.Dto.response.AppointmentsDto;
 import java.util.List;
 
 public interface AppointmentService {
-    AppointmentResponse bookAppointment(AppointmentRequest appointment);
     AppointmentResponse updateAppointment(Long id, AppointmentRequest appointment);
     void cancelAppointment(Long id);
     AppointmentResponse getAppointmentById(Long id);
@@ -16,7 +15,5 @@ public interface AppointmentService {
     AppointmentResponse convertToIP(Long appointmentId,AppointmentRequest request);
     Long getPatientIdByAppointmentId(Long appointmentId);
     String getRoomTypeByAppointmentId(Long appointmentId);
-
-
     List<AppointmentsDto> getAppointmentsByDoctorId(Long doctorId);
 }
