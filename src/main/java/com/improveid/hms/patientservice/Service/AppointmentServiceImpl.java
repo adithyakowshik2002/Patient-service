@@ -69,14 +69,13 @@ public class AppointmentServiceImpl implements AppointmentService{
     }
 
     @Override
-    public AppointmentResponse convertToIP(Long appointmentId,AppointmentRequest request) {
+    public AppointmentResponse convertToIP(Long appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(()->new RuntimeException("Appointment not found"));
 
         if(appointment.getAppointmentType()== AppointmentType.IP){
             throw new RuntimeException("Appointment is already IP:");
         }
         appointment.setAppointmentType(AppointmentType.IP);
-        appointment.setAppointmentDate(LocalDate.now());
 
         return appointmentMapper.toResponse(appointmentRepository.save(appointment));
     }

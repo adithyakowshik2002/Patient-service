@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/appointments")
 @Slf4j
-@CrossOrigin(origins = "http://localhost:5173")
 public class AppointmentController {
 
     @Autowired
@@ -37,7 +36,7 @@ public class AppointmentController {
     }
 
     @GetMapping("/appointments/{patientId}")
-    public ResponseEntity<List<AppointmentResponse>> getAppointmentsForPatient(@PathVariable Long patientId) {
+    public ResponseEntity<List<AppointmentResponse>> getAppointmentsForPatient(@PathVariable("patientId") Long patientId) {
         log.info("Fetching appointments for patient {}", patientId);
         List<AppointmentResponse> appointments = appointmentService.getAppointmentsForPatient(patientId);
         return new ResponseEntity<>(appointments, HttpStatus.OK);
@@ -58,8 +57,8 @@ public class AppointmentController {
 
 
     @PutMapping("/{appointmentId}/converttoip")
-    public ResponseEntity<String> convertToIp(@PathVariable Long appointmentId, @RequestBody AppointmentRequest request) {
-        AppointmentResponse appointment = appointmentService.convertToIP(appointmentId,request);
+    public ResponseEntity<String> convertToIp(@PathVariable Long appointmentId) {
+        AppointmentResponse appointment = appointmentService.convertToIP(appointmentId);
         return ResponseEntity.ok("Appointment Converted to IP successfully");
     }
 

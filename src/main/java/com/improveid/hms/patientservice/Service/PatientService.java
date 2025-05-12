@@ -47,55 +47,57 @@ public class PatientService {
     private MailServiceClient mailServiceClient;
 
     public void registerPatientAndBookAppointment(PatientRequest request, Long doctorId, LocalDate slotDate, LocalTime slotStartTime) {
+        try {
+            Long scheduleId = doctorClient.findScheduleId(doctorId, slotDate, slotStartTime);
 
-        Long scheduleId = doctorClient.findScheduleId(doctorId, slotDate, slotStartTime);
+            if (scheduleId == null) {
+                throw new IllegalArgumentException("No schedule found for the given doctor, date, and time.");
+            }
 
-        if (scheduleId == null) {
-            throw new IllegalArgumentException("No schedule found for the given doctor, date, and time.");
+            PatientEntity patient = patientMapper.toEntity(request);
+            patient = patientRepository.save(patient);
+
+            Appointment appointment = Appointment.builder()
+                    .patient(patient)
+                    .scheduleId(scheduleId)
+                    .appointmentDate(slotDate)
+                    .timeslot(slotStartTime)  //start time
+                    .appointmentType(AppointmentType.OP)
+                    .status(AppointmentStatus.BOOKED)
+                    .doctorId(doctorId)
+                    .build();
+
+            appointmentRepository.save(appointment);
+
+
+            // 4. Book Slot in Doctor Service
+            SlotBookedDTO slotRequest = SlotBookedDTO.builder()
+                    .scheduleId(scheduleId)
+                    .patientId(patient.getId())
+                    .slotDate(String.valueOf(slotDate))
+                    .slotStartTime(String.valueOf(slotStartTime))
+                    .slotEndTime(String.valueOf(slotStartTime.plusMinutes(15)))
+                    .status("BOOKED")
+                    .build();
+
+            doctorClient.bookSlot(slotRequest);
+
+            DoctorDto doctor = doctorClient.getDoctorById(doctorId);
+
+
+            MailDtoClass mail = MailDtoClass.builder()
+                    .fullName(patient.getFirstName() + patient.getLastName())
+                    .doctorName(doctor.getName())
+                    .bookedDate(appointment.getAppointmentDate())
+                    .slotTime(appointment.getTimeslot())
+                    .mailId(patient.getEmail())
+                    .build();
+
+            mailServiceClient.sendEmail(mail);
         }
-
-        PatientEntity patient = patientMapper.toEntity(request);
-        patient = patientRepository.save(patient);
-
-        Appointment appointment = Appointment.builder()
-                .patient(patient)
-                .scheduleId(scheduleId)
-                .appointmentDate(slotDate)
-                .timeslot(slotStartTime)  //start time
-                .appointmentType(AppointmentType.OP)
-                .status(AppointmentStatus.BOOKED)
-                .doctorId(doctorId)
-                .build();
-
-        appointmentRepository.save(appointment);
-
-
-        // 4. Book Slot in Doctor Service
-        SlotBookedDTO slotRequest = SlotBookedDTO.builder()
-                .scheduleId(scheduleId)
-                .patientId(patient.getId())
-                .slotDate(String.valueOf(slotDate))
-                .slotStartTime(String.valueOf(slotStartTime))
-                .slotEndTime(String.valueOf(slotStartTime.plusMinutes(15)))
-                .status("BOOKED")
-                .build();
-
-        doctorClient.bookSlot(slotRequest);
-
-        DoctorDto doctor = doctorClient.getDoctorById(doctorId);
-
-
-
-        MailDtoClass mail = MailDtoClass.builder()
-                .fullName(patient.getFirstName()+patient.getLastName())
-                .doctorName(doctor.getName())
-                .bookedDate(appointment.getAppointmentDate())
-                .slotTime(appointment.getTimeslot())
-                .mailId(patient.getEmail())
-                .build();
-
-        mailServiceClient.sendEmail(mail);
-
+        catch(Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
 
     }
 

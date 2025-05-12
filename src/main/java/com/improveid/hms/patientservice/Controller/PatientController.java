@@ -20,13 +20,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/patients")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+
 public class PatientController {
 
     private final PatientService patientService;
 
     @PostMapping
-    @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<String> CreatePatientAndBookAppointment(@RequestBody PatientRequest patientRequest,
                                                                   @RequestParam Long doctorId,
                                                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate slotDate,

@@ -12,7 +12,7 @@ public interface AppointmentService {
     AppointmentResponse getAppointmentById(Long id);
     List<AppointmentResponse> getAppointmentsForPatient(Long patientId);
     List<AppointmentResponse> getAppointmentsByStatus(String status);
-    AppointmentResponse convertToIP(Long appointmentId,AppointmentRequest request);
+    AppointmentResponse convertToIP(Long appointmentId);
     Long getPatientIdByAppointmentId(Long appointmentId);
     String getRoomTypeByAppointmentId(Long appointmentId);
     List<AppointmentsDto> getAppointmentsByDoctorId(Long doctorId);
