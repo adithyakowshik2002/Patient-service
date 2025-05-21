@@ -21,6 +21,7 @@ import com.improveid.hms.patientservice.feign.SlotBookedDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -46,8 +47,17 @@ public class PatientService {
     @Autowired
     private MailServiceClient mailServiceClient;
 
-    public void registerPatientAndBookAppointment(PatientRequest request, Long doctorId, LocalDate slotDate, LocalTime slotStartTime) {
-        try {
+    @Transactional
+    public void registerPatientAndBookAppointment(PatientRequest request, Long doctorId, LocalDate slotDate, LocalTime slotStartTime,String otp) {
+
+        if(!mailServiceClient.verifyOtp(request.getEmail(),otp)){
+            throw new IllegalArgumentException("OTP not verified. please verify your email with otp before booking.");
+        }
+
+
+
+        try
+        {
             Long scheduleId = doctorClient.findScheduleId(doctorId, slotDate, slotStartTime);
 
             if (scheduleId == null) {
@@ -101,6 +111,7 @@ public class PatientService {
 
     }
 
+    @Transactional
     public void bookForExistingPatient(Long patientId,Long doctorId,LocalDate slotDate,LocalTime slotStartingTime) {
 
         Long scheduleId = doctorClient.findScheduleId(doctorId,slotDate,slotStartingTime);
@@ -143,7 +154,6 @@ public class PatientService {
                 .mailId(patient.getEmail())
                 .build();
         mailServiceClient.sendEmail(mail);
-
     }
 
 

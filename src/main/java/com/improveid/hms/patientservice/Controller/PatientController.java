@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -25,25 +26,35 @@ public class PatientController {
 
     private final PatientService patientService;
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<String> CreatePatientAndBookAppointment(@RequestBody PatientRequest patientRequest,
                                                                   @RequestParam Long doctorId,
                                                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate slotDate,
-                                                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalTime slotStartTime)
+                                                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalTime slotStartTime,@RequestParam String otp)
     {
-        patientService.registerPatientAndBookAppointment(patientRequest,doctorId,slotDate,slotStartTime);
+        patientService.registerPatientAndBookAppointment(patientRequest,doctorId,slotDate,slotStartTime,otp);
         return new ResponseEntity<>("Patient registered and appointment booked successfully!",HttpStatus.CREATED);
     }
 
     @PostMapping("/book-existing")
-    public ResponseEntity<String> bookAppointmentForExistingPatient(@RequestParam Long patientId,
-                                                                    @RequestParam Long doctorId,
-                                                                    @RequestParam LocalDate slotDate,
-                                                                    @RequestParam LocalTime slotStartTime){
+    public ResponseEntity<?> bookAppointmentForExistingPatient(@RequestParam(required = false) Long patientId,
+                                                               @RequestParam(required = false) Long doctorId,
+                                                               @RequestParam(required = false) LocalDate slotDate,
+                                                               @RequestParam(required = false) LocalTime slotStartTime){
+
+        List<String> missingParams = new ArrayList<>();
+
+        if(patientId == null) missingParams.add("patientId");
+        if(doctorId == null) missingParams.add("doctorId");
+        if(slotDate == null) missingParams.add("slotDate");
+        if(slotStartTime == null) missingParams.add("slotStartTime");
+
+        if(!missingParams.isEmpty()){
+            throw new IllegalArgumentException("Missing parameters: "+String.join(", ",missingParams));
+        }
         patientService.bookForExistingPatient(patientId,doctorId,slotDate,slotStartTime);
         return new ResponseEntity<>("Existing patient booked successfully!",HttpStatus.OK);
     }
-
     @GetMapping("getallpatients")
     public ResponseEntity<List<PatientResponse>> getALlPatients(){
         List<PatientResponse> Patients = patientService.getAllPatients();

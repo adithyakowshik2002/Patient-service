@@ -19,6 +19,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // so all that two appointmet linked to the same patientId.
     List<Appointment> findByPatientId(Long patientId);
 
+   Appointment findByPatientIdAndAppointmentDateAndTimeslot(Long patientId,LocalDate date,LocalTime time);
     List<Appointment> findByStatus(AppointmentStatus status);
 
     List<Appointment> findByDoctorId(Long doctorId);

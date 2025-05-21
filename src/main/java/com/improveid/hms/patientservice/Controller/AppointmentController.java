@@ -13,9 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,7 +58,7 @@ public class AppointmentController {
     }
 
 
-    @PutMapping("/{appointmentId}/converttoip")
+    @PutMapping("/converttoip/{appointmentId}")
     public ResponseEntity<String> convertToIp(@PathVariable Long appointmentId) {
         AppointmentResponse appointment = appointmentService.convertToIP(appointmentId);
         return ResponseEntity.ok("Appointment Converted to IP successfully");
@@ -75,10 +77,18 @@ public class AppointmentController {
         return appointmentService.getRoomTypeByAppointmentId(appointmentId);
     }
 
+    //@PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("fetch-appointments/{doctorId}")
     public ResponseEntity<List<AppointmentsDto>> getAppointmentsByDoctorId(@PathVariable Long doctorId) {
         List<AppointmentsDto> responses = appointmentService.getAppointmentsByDoctorId(doctorId);
         return ResponseEntity.ok(responses);
+    }
+    @PutMapping("/update-status")
+    public ResponseEntity<String> updateStatus(@RequestParam Long patientId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime time){
+
+        Appointment appointment = appointmentService.getAppointmentByPatientIdAndDateAndTime(patientId,date,time);
+        return ResponseEntity.ok("Status Updated");
     }
 
 }
